@@ -1,5 +1,10 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
-const { token, clientId, channelId } = require('./config.json');
+const config = require('./config.json');
+
+// Use environment variables, falling back to config values if not set
+const token = process.env.BOT_TOKEN || config.token;
+const clientId = process.env.CLIENT_ID || config.clientId;
+const channelId = process.env.CHANNEL_ID || config.channelId;
 
 const client = new Client({
   intents: [
@@ -24,12 +29,10 @@ const rest = new REST({ version: '10' }).setToken(token);
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
-
     await rest.put(
       Routes.applicationCommands(clientId),
       { body: commands },
     );
-
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
