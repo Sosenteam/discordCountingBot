@@ -10,8 +10,11 @@ COPY package*.json ./
 # Install the bot's dependencies
 RUN npm install
 
-# Copy the bot's source code and configuration
-COPY . .
+# Copy the bot's source code
+COPY index.js ./
+
+# Copy the config file
+COPY config.json ./
 
 # Make sure the bot script is executable
 RUN chmod +x index.js
