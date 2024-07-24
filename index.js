@@ -1,39 +1,82 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
+const { token, clientId, channelId } = require('./config.json');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
 
-client.commands = new Collection();
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+let count = 0;
+let lastUserId = null;
 
-for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
-		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-		}
-	}
-}
+const commands = [
+  {
+    name: 'checkcount',
+    description: 'Check the current :3 count without breaking the streak',
+  },
+];
 
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+const rest = new REST({ version: '10' }).setToken(token);
 
-for (const file of eventFiles) {
-	const filePath = path.join(eventsPath, file);
-	const event = require(filePath);
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
+(async () => {
+  try {
+    console.log('Started refreshing application (/) commands.');
+
+    await rest.put(
+      Routes.applicationCommands(clientId),
+      { body: commands },
+    );
+
+    console.log('Successfully reloaded application (/) commands.');
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+client.once('ready', () => {
+  console.log('Bot is ready!');
+});
+
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+  if (message.channel.id !== channelId) return;
+
+  if (message.content === ':3') {
+    if (message.author.id !== lastUserId) {
+      count++;
+      lastUserId = message.author.id;
+      await updateTopic(message.channel);
+    } else {
+      await message.reply("You can't contribute to the streak twice in a row! Wait for someone else to send :3");
+    }
+  } else {
+    if (count > 0) {
+      await message.channel.send(`Streak broken! Total consecutive :3s from different users: ${count}`);
+      count = 0;
+      lastUserId = null;
+      await updateTopic(message.channel);
+    }
+  }
+});
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
+  if (interaction.channelId !== channelId) return;
+
+  if (interaction.commandName === 'checkcount') {
+    await interaction.reply(`Current :3 count: ${count}`);
+  }
+});
+
+async function updateTopic(channel) {
+  try {
+    await channel.setTopic(`Current :3 streak from different users: ${count}`);
+  } catch (error) {
+    console.error('Failed to update channel topic:', error);
+  }
 }
 
 client.login(token);
