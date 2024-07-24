@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Make sure the bot script is executable
-RUN chmod +x bot.js
+RUN chmod +x index.js
 
 # Run the bot when the container launches
-CMD [ "node", "bot.js" ]
+CMD [ "node", "index.js" ]
