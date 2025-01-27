@@ -52,7 +52,7 @@ client.on('messageCreate', async (message) => {
   if (message.content.includes(':3')) {
     if (message.author.id !== lastUserId) {
       count++;
-      fs.writeFile('count.txt', count, err => {console.error(err)})
+      fs.writeFile('count.txt', toString(count), err => {console.error(err)})
       lastUserId = message.author.id;
       await updateTopic(message.channel);
     } else {
@@ -62,7 +62,7 @@ client.on('messageCreate', async (message) => {
     if (count > 0) {
       await message.channel.send(`Streak broken! Total consecutive :3s from different users: ${count}`);
       count = 0;
-      fs.writeFile('count.txt', count, err => {console.error(err)})
+      fs.writeFile('count.txt', toString(count), err => {console.error(err)})
       lastUserId = null;
       await updateTopic(message.channel);
     }
