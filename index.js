@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
-const fs = require(fs);
+const fs = require('fs');
 const config = require('./config.json');
 
 // Use environment variables, falling back to config values if not set

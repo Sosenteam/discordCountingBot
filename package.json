@@ -17,6 +17,7 @@
   "homepage": "https://github.com/Sosenteam/3-counter#readme",
   "description": "",
   "dependencies": {
-    "discord.js": "^14.15.3"
+    "discord.js": "^14.15.3",
+    "fs": "^0.0.1-security"
   }
 }
