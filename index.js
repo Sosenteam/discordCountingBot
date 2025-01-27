@@ -64,7 +64,7 @@ client.on('messageCreate', async (message) => {
       count = 0;
       fs.writeFile('count.txt', toString(count), err => {console.error(err)});
       console.log("Wrote Count to File: " + count + " aka. " + toString(count));
-      console("Count.txt = " + Number(fs.readFileSync('count.txt')));
+      console.log("Count.txt = " + Number(fs.readFileSync('count.txt')));
       lastUserId = null;
       await updateTopic(message.channel);
     }
