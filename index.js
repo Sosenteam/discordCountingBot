@@ -53,6 +53,8 @@ client.on('messageCreate', async (message) => {
     if (message.author.id !== lastUserId) {
       count++;
       fs.writeFile('count.txt', count.toString(), err => {console.error(err)})
+      console.log("Wrote Count to File: " + count + " aka. " + count.toString());
+      console.log("Count.txt = " + Number(fs.readFileSync('count.txt')));
       lastUserId = message.author.id;
       await updateTopic(message.channel);
     } else {
