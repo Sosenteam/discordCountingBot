@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
+const fs = require(fs);
 const config = require('./config.json');
 
 // Use environment variables, falling back to config values if not set
@@ -41,6 +42,7 @@ const rest = new REST({ version: '10' }).setToken(token);
 
 client.once('ready', () => {
   console.log('Bot is ready!');
+  count=Number(fs.readFileSync('count.txt'));
 });
 
 client.on('messageCreate', async (message) => {
@@ -50,6 +52,7 @@ client.on('messageCreate', async (message) => {
   if (message.content.includes(':3')) {
     if (message.author.id !== lastUserId) {
       count++;
+      fs.writeFile('count.txt', count, err => {console.error(err)})
       lastUserId = message.author.id;
       await updateTopic(message.channel);
     } else {
@@ -59,6 +62,7 @@ client.on('messageCreate', async (message) => {
     if (count > 0) {
       await message.channel.send(`Streak broken! Total consecutive :3s from different users: ${count}`);
       count = 0;
+      fs.writeFile('count.txt', count, err => {console.error(err)})
       lastUserId = null;
       await updateTopic(message.channel);
     }
